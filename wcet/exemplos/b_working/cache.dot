@@ -1,0 +1,62 @@
+digraph G {
+	label = "cnt.bin" splines=true overlap=false
+
+	"0" [ label = "0 [16,20]\nl[1]=0\n\nt=9\nc_am=1\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"1" [ label = "1 [31,35]\nl[1]=0\nl[2]=0\n\nt=15\nc_am=1\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"2" [ label = "2 [21,25]\nl[1]=0\n\nt=9\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"3" [ label = "3 [36,40]\nl[2]=0\n\nt=9\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"4" [ label = "4 [55,61]\nl[3]=0\n\nt=11\nc_am=1\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"5" [ label = "5 [62,64]\nl[3]=0\nl[4]=0\n\nt=8\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"6" [ label = "6 [65,68]\nl[4]=0\n\nt=9\nc_am=0\nc_fm=0\nc_cm=1\n" style = "filled, solid" shape = "octagon"]
+	"7" [ label = "7 [69,71]\nl[4]=0\n\nt=7\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"8" [ label = "8 [72,82]\nl[4]=0\nl[5]=0\n\nt=25\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"9" [ label = "9 [83,86]\nl[5]=0\n\nt=9\nc_am=0\nc_fm=1\nc_cm=0\n" style = "filled, solid" shape = "octagon"]
+	"10" [ label = "10 [87,88]\nl[5]=0\n\nt=6\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"11" [ label = "11 [89,92]\nl[5]=0\n\nt=8\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"12" [ label = "12 [41,46]\nl[2]=0\n\nt=10\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"13" [ label = "13 [93,102]\nl[5]=0\nl[6]=0\n\nt=14\nc_am=1\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"14" [ label = "14 [103,105]\nl[6]=0\n\nt=8\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"15" [ label = "15 [106,109]\nl[6]=0\n\nt=9\nc_am=0\nc_fm=0\nc_cm=1\n" style = "filled, solid" shape = "octagon"]
+	"16" [ label = "16 [110,112]\nl[6]=0\nl[7]=0\n\nt=7\nc_am=0\nc_fm=1\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"17" [ label = "17 [113,115]\nl[7]=0\n\nt=8\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"18" [ label = "18 [116,119]\nl[7]=0\n\nt=9\nc_am=0\nc_fm=0\nc_cm=1\n" style = "filled, solid" shape = "octagon"]
+	"19" [ label = "19 [120,130]\nl[7]=0\nl[8]=0\n\nt=25\nc_am=0\nc_fm=1\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"20" [ label = "20 [131,146]\nl[8]=0\nl[9]=0\n\nt=31\nc_am=0\nc_fm=1\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"21" [ label = "21 [147,162]\nl[9]=0\nl[10]=0\n\nt=31\nc_am=0\nc_fm=2\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"22" [ label = "22 [163,177]\nl[10]=0\nl[11]=0\n\nt=43\nc_am=2\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"23" [ label = "23 [47,54]\nl[2]=0\nl[3]=0\n\nt=12\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"24" [ label = "24 [26,30]\nl[1]=0\n\nt=9\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"25" [ label = "25 [0,2]\nl[0]=0\n\nt=7\nc_am=1\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	"26" [ label = "26 [3,3]\nl[0]=0\n\nt=5\nc_am=0\nc_fm=0\nc_cm=0\n" style = "filled, solid" shape = "box"]
+	0 -> 1
+	1 -> 2
+	2 -> 3
+	3 -> 4
+	4 -> 6
+	5 -> 6
+	6 -> 7
+	6 -> 11
+	7 -> 9
+	8 -> 9
+	9 -> 10
+	9 -> 5
+	10 -> 8
+	11 -> 12
+	12 -> 13
+	13 -> 15
+	14 -> 15
+	15 -> 16
+	15 -> 22
+	16 -> 18
+	17 -> 18
+	18 -> 19
+	18 -> 14
+	19 -> 20
+	19 -> 21
+	20 -> 17
+	21 -> 17
+	22 -> 23
+	23 -> 24
+	24 -> 26
+	25 -> 0
+}

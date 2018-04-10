@@ -1,0 +1,78 @@
+	.file	"loop-aninhado1-1.ll"
+	.text
+	.globl	main
+	.type	main,@function
+main:                                   # @main
+
+# BB#0:
+	addiu	$sp, $sp, -32
+	sw	$zero, 28($sp)
+	sw	$zero, 24($sp)
+	sw	$zero, 20($sp)
+	sw	$zero, 16($sp)
+	sw	$zero, 12($sp)
+	sw	$zero, 8($sp)
+	sw	$zero, 4($sp)
+	sw	$zero, 24($sp)
+	j	$BB0_2
+	nop
+$BB0_1:                                 #   in Loop: Header=BB0_2 Depth=1
+	lw	$1, 24($sp)
+	addiu	$1, $1, 1
+	sw	$1, 24($sp)
+$BB0_2:                                 # =>This Loop Header: Depth=1
+                                        #     Child Loop BB0_5 Depth 2
+                                        #       Child Loop BB0_8 Depth 3
+	lw	$1, 24($sp)
+	cmpgti	$p1, $1, 4
+	br	$p1, $BB0_9
+	nop
+$BB0_3:                                 #   in Loop: Header=BB0_2 Depth=1
+	sw	$zero, 20($sp)
+	j	$BB0_5
+	nop
+$BB0_4:                                 #   in Loop: Header=BB0_5 Depth=2
+	lw	$1, 20($sp)
+	addiu	$1, $1, 1
+	sw	$1, 20($sp)
+$BB0_5:                                 #   Parent Loop BB0_2 Depth=1
+                                        # =>  This Loop Header: Depth=2
+                                        #       Child Loop BB0_8 Depth 3
+	lw	$1, 20($sp)
+	cmpgti	$p1, $1, 5
+	br	$p1, $BB0_1
+	nop
+$BB0_6:                                 #   in Loop: Header=BB0_5 Depth=2
+	sw	$zero, 16($sp)
+	j	$BB0_8
+	nop
+$BB0_7:                                 #   in Loop: Header=BB0_8 Depth=3
+	lw	$1, 16($sp)
+	sw	$1, 12($sp)
+	lw	$1, 20($sp)
+	sw	$1, 8($sp)
+	lw	$2, 12($sp)
+	addu	$1, $2, $1
+	sw	$1, 4($sp)
+	lw	$1, 16($sp)
+	addiu	$1, $1, 1
+	sw	$1, 16($sp)
+$BB0_8:                                 #   Parent Loop BB0_2 Depth=1
+                                        #     Parent Loop BB0_5 Depth=2
+                                        # =>    This Inner Loop Header: Depth=3
+	lw	$1, 16($sp)
+	cmpgti	$p1, $1, 6
+	br	$p1, $BB0_4
+	nop
+$BB0_10:                                #   in Loop: Header=BB0_8 Depth=3
+	j	$BB0_7
+	nop
+$BB0_9:
+	lw	$4, 28($sp)
+	addiu	$sp, $sp, 32
+	jr	$ra
+	nop
+$tmp1:
+	.size	main, ($tmp1)-main
+
+

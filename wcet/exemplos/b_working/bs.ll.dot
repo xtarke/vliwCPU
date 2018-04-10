@@ -1,0 +1,15 @@
+digraph CFG {
+	node [shape=record,width=.1,height=.1];
+	"main:0" -> "binary_search:1";
+	"binary_search:1" -> "binary_search:3";
+	"binary_search:2" -> "binary_search:3";
+	"binary_search:3" -> "binary_search:4";
+	"binary_search:3" -> "binary_search:8";
+	"binary_search:4" -> "binary_search:2";
+	"binary_search:4" -> "binary_search:5";
+	"binary_search:5" -> "binary_search:6";
+	"binary_search:5" -> "binary_search:7";
+	"binary_search:6" -> "binary_search:3";
+	"binary_search:7" -> "binary_search:3";
+	"binary_search:8" -> "main:9";
+}

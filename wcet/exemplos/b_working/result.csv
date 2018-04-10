@@ -1,0 +1,38 @@
+CPU_CLOCK: 20	MEM_CLOCK: 40
+CACHE_LINES: 16	CACHE_BLOCKS: 16	Cache Penalty: 36
+
+wcet:
+break2.bin,430
+bs.bin,517
+bsort100.bin,1660381
+cnt.bin,18235
+cover.bin,12625
+crc.bin,329002
+edn.bin,729885
+fdct.bin,13552
+fibcall.bin,544
+insertsort.bin,10534
+janne_complex.bin,8686
+lcdnum.bin,1567
+matmult.bin,1070818
+ns.bin,55387
+prime.bin,35311
+swap.bin,94
+
+sim:
+break2.bin,430,8600 ns
+bs.bin,494,9880 ns
+bsort100.bin,799037,15980740 ns
+cnt.bin,17930,358600 ns
+cover.bin,12445,248900 ns
+crc.bin,161701,3234020 ns
+edn.bin,716900,14338 us
+fdct.bin,13167,263340 ns
+fibcall.bin,544,10880 ns
+insertsort.bin,5915,118300 ns
+janne_complex.bin,1321,26420 ns
+lcdnum.bin,1022,20440 ns
+matmult.bin,1036017,20720340 ns
+ns.bin,54758,1095160 ns
+prime.bin,35287,705740 ns
+swap.bin,82,1640 ns

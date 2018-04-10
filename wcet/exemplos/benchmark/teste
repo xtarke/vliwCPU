@@ -1,0 +1,2 @@
+LLVM ERROR: Cannot select: 0x301ee00: i32 = ExternalSymbol'__fixdfdi' [ID=20]
+In function: main

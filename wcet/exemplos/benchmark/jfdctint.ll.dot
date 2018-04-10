@@ -1,0 +1,17 @@
+digraph CFG {
+	node [shape=record,width=.1,height=.1];
+	"main:0" -> "main:2";
+	"main:1" -> "main:2";
+	"main:2" -> "main:1";
+	"main:2" -> "main:3";
+	"main:3" -> "jpeg_fdct_islow:4";
+	"jpeg_fdct_islow:4" -> "jpeg_fdct_islow:6";
+	"jpeg_fdct_islow:5" -> "jpeg_fdct_islow:6";
+	"jpeg_fdct_islow:6" -> "jpeg_fdct_islow:5";
+	"jpeg_fdct_islow:6" -> "jpeg_fdct_islow:7";
+	"jpeg_fdct_islow:7" -> "jpeg_fdct_islow:9";
+	"jpeg_fdct_islow:8" -> "jpeg_fdct_islow:9";
+	"jpeg_fdct_islow:9" -> "jpeg_fdct_islow:8";
+	"jpeg_fdct_islow:9" -> "jpeg_fdct_islow:10";
+	"jpeg_fdct_islow:10" -> "main:11";
+}

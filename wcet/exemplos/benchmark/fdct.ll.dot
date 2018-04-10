@@ -1,0 +1,13 @@
+digraph CFG {
+	node [shape=record,width=.1,height=.1];
+	"main:0" -> "fdct:1";
+	"fdct:1" -> "fdct:3";
+	"fdct:2" -> "fdct:3";
+	"fdct:3" -> "fdct:2";
+	"fdct:3" -> "fdct:4";
+	"fdct:4" -> "fdct:6";
+	"fdct:5" -> "fdct:6";
+	"fdct:6" -> "fdct:5";
+	"fdct:6" -> "fdct:7";
+	"fdct:7" -> "main:8";
+}

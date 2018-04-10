@@ -1,0 +1,5 @@
+digraph CFG {
+	node [shape=record,width=.1,height=.1];
+	"main:0" -> "inc:1";
+	"inc:1" -> "main:2";
+}
