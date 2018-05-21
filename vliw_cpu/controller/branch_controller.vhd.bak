@@ -1,0 +1,79 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+use work.opcodes.all;
+
+entity branch_controller is
+port (
+	clk    	: in std_logic;	
+	reset  : in std_logic;
+		
+   slot_0_in : in word_t;
+	reg_addr : in word_t;
+	
+	pred_value : in std_logic;
+
+	
+	branch_en		: out std_logic;
+	
+	branch_addr	: out word_t	
+	);
+end branch_controller;
+
+
+architecture rtl of branch_controller is
+
+	-- internal register signals
+	signal branch_ins	: std_logic;	
+	signal br_true		: std_logic;
+	signal br_false	: std_logic;
+
+begin	
+	
+	process (clk, reset, slot_0_in, reg_addr, pred_value)
+	begin
+		if reset = '1' then
+			branch_addr	<= (branch_addr'range => '0');					
+		else
+			if rising_edge(clk) then
+			
+				branch_ins <= '0';	
+				br_true		<= '0';
+				br_false		<= '0';
+					
+				if slot_0_in(INS_FORMAT_END downto INS_FORMAT_INI) = "11" then
+				
+					branch_ins <= '1';
+					
+					if slot_0_in(CTRFL_BR_SELC) = '0'  and slot_0_in(CTRFL_SELC) = '1' then
+							br_true	<= '1';							
+					else
+							br_false	<= '1';								
+					end if;
+												
+					if slot_0_in(CTRFL_REG_IMM_SELL) = '1' or slot_0_in(CTRFL_SELC) = '1' then						
+				
+						--immediate sign extension
+						if slot_0_in(BTARG_END) = '1' then
+							branch_addr <= "111111111" & slot_0_in(BTARG_END downto BTARG_INI);
+						else
+							branch_addr <= "000000000" & slot_0_in(BTARG_END downto BTARG_INI);
+						end if;						
+						
+					else
+						branch_addr	<= reg_addr;					
+					end if;
+				
+				end if;			
+			end if;	
+		end if;	
+	end process;
+	
+	branch_en <= branch_ins and (not(br_true or br_false) or (not(br_true) and br_false and not(pred_value)) or (br_true and not(br_false) and pred_value));	
+
+end rtl;
+
+
+

@@ -1,0 +1,180 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+
+entity fetch is
+port (
+	clk      		: in std_logic;	
+	reset    		: in std_logic;
+	cache_busy 		: in std_logic;
+	
+	branch_in		: in std_logic;
+	b_address		: in word_t;
+	
+	bunble_in  		: in  std_logic_vector(BUNDLE_SIZE-1 downto 0);
+	
+	cache_line_in  : in  std_logic_vector(CACHE_LINE_SIZE-1 downto 0);
+	
+	bundle_error	: out std_logic;
+	next_pc_out		: out word_t;		
+	
+	slot_0 			: out word_t;
+	slot_1 			: out word_t;
+	slot_2 			: out word_t;
+	slot_3 			: out word_t
+		
+	);
+end fetch;
+
+
+architecture rtl of fetch is
+	-- fsm definition
+	type fetch_state_type is (IDLE, READING, ISSUING);
+	signal fetch_state : fetch_state_type;
+	
+	signal pc : word_t;
+		
+	signal cache_word_offset : std_logic_vector (7 downto 0);	
+	
+	signal issue_ins : std_logic_vector(2 downto 0);
+	
+	signal mask : std_logic_vector(3 downto 0);
+	
+	signal buffer_enable : std_logic;
+		
+	signal cache_address 	: word_t;
+	
+	signal ins_buffer_reset : std_logic;
+	signal ins_buffer_clear : std_logic;
+	
+	signal bundle_sel : std_logic;
+	
+	signal bundle_test : std_logic_vector(BUNDLE_SIZE-1 downto 0);
+	
+	component ins_buffer
+		port (
+			clk      			: in std_logic;	
+			reset    			: in std_logic;
+			enable            : in std_logic;
+	
+			bundle_in  			: in std_logic_vector(BUNDLE_SIZE-1 downto 0);
+	
+			slot_0			   : out word_t; 
+			slot_1			   : out word_t;
+			slot_2			   : out word_t;
+			slot_3			   : out word_t;
+			
+			next_address 		: out word_t
+	);
+	end component ins_buffer;
+	
+	component cache_buffer
+	port (
+		clk      			: in std_logic;	
+		reset    			: in std_logic;
+				
+		bundle_sel			: in std_logic;
+		cache_data			: in std_logic_vector(CACHE_LINE-1 downto 0);
+		
+		bundle_out 			: out std_logic_vector(BUNDLE_SIZE-1 downto 0)
+		
+	);
+	end component cache_buffer;
+	
+begin
+
+	ins_buffer_reset <= reset or ins_buffer_clear;
+	
+	ins_buffer_1: ins_buffer
+		port map (
+			clk => clk,
+			reset => ins_buffer_clear,
+			enable => buffer_enable,
+			bundle_in => bunble_in,			
+			slot_0 => slot_0,
+			slot_1 => slot_1,
+			slot_2 => slot_2,
+			slot_3 => slot_3,			
+			next_address => cache_address			
+		);
+		
+		
+	cache_buffer_1: cache_buffer
+		port map ( 
+			clk => clk,
+			reset => reset,
+			bundle_sel => bundle_sel,
+			cache_data => cache_line_in,
+			bundle_out => bundle_test		
+		);
+	
+	--fsm state progression
+	do_clk_state: process (clk, reset, cache_busy)
+	begin
+		if reset = '1' or cache_busy = '1' then
+			fetch_state <= IDLE;			
+		else			
+			if rising_edge (clk) then
+				case fetch_state is
+					when IDLE =>
+						fetch_state <= READING;																
+					when READING =>
+						fetch_state <= ISSUING;		
+					when ISSUING =>
+--						if issue_ins_counter >= 3 then
+							fetch_state <= READING;
+--						end if;
+				end case;		
+			end if;		
+		end if;	
+	end process;
+	
+	--selects the bundle
+	bundle_sel <= cache_address(BK_OFFSET_END);
+	
+	mask <= bunble_in(127) & bunble_in(95) & bunble_in(63) & bunble_in(31);
+	
+	--fsm ouput progression
+	do_state_output: process (fetch_state)
+	begin		
+		case fetch_state is
+			when IDLE =>
+				buffer_enable <= '0';
+				bundle_error <= '0';
+			when READING =>				
+				buffer_enable <= '1';				
+				--check stop bits
+				if mask = "0000" then
+					bundle_error <= '1';
+				else
+					bundle_error <= '0';				
+				end if;
+
+			when ISSUING =>				
+				buffer_enable <= '1';				
+			end case;
+	end process;
+	
+	--address_mux: process (clk, reset, cache_address, branch_in)
+	address_mux: process (reset, cache_address, branch_in)
+	begin
+		if reset = '1' then
+			next_pc_out <= cache_address;
+			ins_buffer_clear <= '0';
+		else
+			--if rising_edge (clk) then
+			
+			if branch_in = '0' then
+				next_pc_out <= cache_address;
+				ins_buffer_clear <= '0';
+			else
+				ins_buffer_clear <= '1';
+				next_pc_out <= b_address;
+			end if;
+			
+			--end if;
+		end if;
+	end process;
+end rtl;

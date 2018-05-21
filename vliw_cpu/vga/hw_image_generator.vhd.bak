@@ -1,0 +1,418 @@
+--------------------------------------------------------------------------------
+--
+--   FileName:         hw_image_generator.vhd
+--   Dependencies:     none
+--   Design Software:  Quartus II 64-bit Version 12.1 Build 177 SJ Full Version
+--
+--   HDL CODE IS PROVIDED "AS IS."  DIGI-KEY EXPRESSLY DISCLAIMS ANY
+--   WARRANTY OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT
+--   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+--   PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT SHALL DIGI-KEY
+--   BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR CONSEQUENTIAL
+--   DAMAGES, LOST PROFITS OR LOST DATA, HARM TO YOUR EQUIPMENT, COST OF
+--   PROCUREMENT OF SUBSTITUTE GOODS, TECHNOLOGY OR SERVICES, ANY CLAIMS
+--   BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF),
+--   ANY CLAIMS FOR INDEMNITY OR CONTRIBUTION, OR OTHER SIMILAR COSTS.
+--
+--   Version History
+--   Version 1.0 05/10/2013 Scott Larson
+--     Initial Public Release
+--    
+--------------------------------------------------------------------------------
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
+ENTITY hw_image_generator IS
+	GENERIC(
+		-- resolution, look at vga_controller mode		
+		pixels_max_x	:	INTEGER := 800;
+		pixels_max_y :	INTEGER := 600;
+		font_pixel_h		: integer := 15;
+		
+		-- blank time depends on:
+		-- CONSTANT	h_period	:	INTEGER := h_pulse + h_bp + h_pixels + h_fp;  --total number of pixel clocks in a row     tuned for 800x600		
+		blank_time   : integer := 256 - 1;
+		
+		font_pixel_w : std_logic_vector(2 downto 0) := "101" -- controls shift register loader waiting time		
+		); 
+		
+		
+	PORT(
+		clk 				: in 	std_logic;
+		reset 			: in std_logic;
+		
+		disp_ena	:	IN		STD_LOGIC;	--display enable ('1' = display time, '0' = blanking time)
+		row				:	IN		INTEGER;		--row pixel coordinate
+		column		:	IN		INTEGER;		--column pixel coordinate
+		
+		refresh		: in std_logic;
+		vga_reset_n	: out std_logic;
+		
+		red				:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');  --red magnitude output to DAC
+		green			:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');  --green magnitude output to DAC
+		blue				:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0')); --blue magnitude output to DAC
+END hw_image_generator;
+
+ARCHITECTURE behavior OF hw_image_generator IS
+
+	component font_rom 
+   port(
+      clk: in std_logic;
+      addr: in std_logic_vector(10 downto 0);
+      data: out std_logic_vector(7 downto 0)
+   );
+	end component;
+	
+	component char_mem is
+   port(
+      clk: in std_logic;
+      char_read_addr : in std_logic_vector(11 downto 0);
+      char_write_addr: in std_logic_vector(11 downto 0);
+      char_we : in std_logic;
+      char_write_value : in std_logic_vector(7 downto 0);
+      char_read_value : out std_logic_vector(7 downto 0)
+   );
+	end component;
+	
+	component shift_reg
+	PORT
+	(
+		clock		: IN STD_LOGIC ;
+		data		: IN STD_LOGIC_VECTOR (7 DOWNTO 0);
+		load		: IN STD_LOGIC ;
+		shiftout		: OUT STD_LOGIC 
+	);
+end component;
+
+	-- fsm definition
+	type img_ctl_state_type is (RST, IDLE, FILL, CHAR, FONT, SHIFT, BLANK, LONG_BLANK);
+	signal img_ctl_state : img_ctl_state_type;
+	
+	signal f_addr : std_logic_vector(10 downto 0);
+	signal f_data :  std_logic_vector(7 downto 0);
+	
+	signal shift_out : std_logic;
+	signal shift_ld : std_logic;
+	
+	signal char_read_addr :  std_logic_vector(11 downto 0);
+	signal char_read_value : std_logic_vector(7 downto 0);
+	
+	signal char_read_value_shifted : std_logic_vector(11 downto 0);
+
+	signal chr_add_inc : std_logic;
+		
+	signal f_addr_offset : std_logic_vector(3 downto 0);
+	
+	signal pixels : std_logic_vector(2 downto 0);
+	
+	signal pixel_x 		 : integer;
+	signal pixel_y		 : std_logic_vector(10 downto 0);
+	signal msg_line  : std_logic_vector(4 downto 0);
+	
+	signal blank_time_cnt : integer;
+	
+	signal pixel_ctn_en : std_logic;
+	signal pixel_y_ctn_en : std_logic;
+	signal blank_time_en : std_logic;
+	
+	signal char_read_addr_ld : std_logic;
+	
+	signal line_inc_en : std_logic;
+	
+BEGIN
+
+	-- multiply for 16
+	char_read_value_shifted <= char_read_value & "0000";	
+	-- generate row offfset
+	--f_addr_offset <= std_logic_vector(to_unsigned(pixel_y, f_addr_offset'length)) ;
+	f_addr_offset <= pixel_y(3 downto 0);
+	-- generate font_address		
+	f_addr <= char_read_value_shifted(10 downto 0) + f_addr_offset;
+	
+	msg_line <= pixel_y(8 downto 4);
+	
+	font_rom_1 : font_rom port map
+	(
+		clk => clk,
+		addr => f_addr,
+		data => f_data	
+	);
+	
+	shift_1 : shift_reg port map
+	(
+		clock => clk,
+		data   => f_data,
+		load   => shift_ld,
+		shiftout => shift_out		
+	);
+	
+	char_mem_1:  char_mem port map
+   (
+      clk	=> clk,
+      char_read_addr 	=> char_read_addr,
+      char_write_addr	=> (OTHERS => '0'),
+      char_we 					=> '0',
+      char_write_value => (OTHERS => '0'),
+      char_read_value => char_read_value
+   );
+	
+	
+	do_clk_state: process (clk, reset, disp_ena)
+	begin
+		if reset = '1'  then
+			img_ctl_state <= RST;		
+			pixels <= (others => '0');
+			
+		else
+			if rising_edge (clk) then
+					
+				case img_ctl_state is
+					
+					when RST =>
+						img_ctl_state <= IDLE;
+					
+					
+					when IDLE =>
+						img_ctl_state <= FILL;
+					
+					when FILL =>
+						img_ctl_state <= FONT;
+						pixels	<= (others => '0');
+						
+					when CHAR =>
+						img_ctl_state <= FONT;
+						pixels	<= (others => '0');	
+	
+						if disp_ena = '0' then
+								img_ctl_state <= BLANK;
+						end if;
+					
+					when FONT => 					
+						img_ctl_state <= SHIFT;
+						
+						if disp_ena = '0' then
+							img_ctl_state <= BLANK;
+						end if;
+						
+						if pixel_x = 800 and pixel_y = std_logic_vector(to_unsigned(600, pixel_y'length)) then
+							img_ctl_state <= LONG_BLANK;
+						end if;
+						
+						
+					when SHIFT => 
+						pixels	<= pixels + 1;
+						
+						if pixels = font_pixel_w then
+							img_ctl_state <= CHAR;
+						end if;
+	
+						if disp_ena = '0' then
+								img_ctl_state <= BLANK;
+						end if;
+						
+					when BLANK => 
+						if blank_time_cnt = blank_time - 1 then
+							img_ctl_state <= FONT;
+							pixels	<= (others => '0');
+						end if;
+						
+					when LONG_BLANK =>
+						pixels	<= (others => '0');
+						
+						if refresh = '1' then
+							img_ctl_state <= FONT;
+						end if;						
+						
+				end case;		
+			end if;		
+		end if;	
+	end process;
+	
+	
+	do_state_output: process (img_ctl_state, blank_time_cnt, disp_ena, refresh)
+	begin
+	
+		chr_add_inc <= '0';
+		shift_ld			<= '0';
+	
+		pixel_ctn_en	<= '1';
+		pixel_y_ctn_en <= '0';	
+		
+		blank_time_en <= '0';
+		char_read_addr_ld <= '0';
+		
+		line_inc_en <= '0';
+		
+		-- vga sync reset
+		vga_reset_n <= '1';
+	
+		case img_ctl_state is
+			when RST =>
+				vga_reset_n <= '0';
+				pixel_ctn_en	<= '0';
+			
+			when IDLE =>
+				pixel_ctn_en	<= '0';
+				vga_reset_n <= '0';
+
+			when FILL => 
+				pixel_ctn_en <= '0';
+				chr_add_inc <= '1';
+				shift_ld			<= '1';
+				vga_reset_n <= '1';
+				
+			when CHAR =>
+				if disp_ena = '1' then
+					chr_add_inc <= '1';
+					shift_ld			<= '1';
+				end if;
+						
+			when FONT => 					
+				
+			when SHIFT => 
+			
+			when BLANK =>
+				pixel_ctn_en <= '0';
+				char_read_addr_ld <= '1';
+				blank_time_en <= '1';
+				
+				if blank_time_cnt = blank_time -1 then
+						shift_ld			<= '1';
+						blank_time_en <= '0';
+						
+						char_read_addr_ld <= '0';
+						chr_add_inc <= '1';						
+				end if;
+				
+			when LONG_BLANK =>
+				pixel_ctn_en <= '0';
+				char_read_addr_ld <= '1';
+				
+				if refresh = '1' then
+						shift_ld			<= '1';
+						chr_add_inc <= '1';
+						char_read_addr_ld <= '0';
+				end if;						
+				
+						
+		end case;		
+	end process;
+	
+	-- address inc
+	process (clk, reset, chr_add_inc)
+	begin
+		if reset = '1' then
+			char_read_addr	<= (others => '0');
+		else
+			if rising_edge(clk) then
+				if chr_add_inc = '1' then
+					char_read_addr <= char_read_addr + 1;
+				end if;
+				
+				if char_read_addr_ld = '1' then
+					--char_read_addr	<= (others => '0');				
+					char_read_addr	<= msg_line & "0000000";
+				end if;
+			end if;		
+		end if;	
+	end process;
+	
+	
+	process (clk, reset)
+	begin
+		if reset = '1' then
+			pixel_x <= 0;
+		else
+			if rising_edge(clk) then
+				if pixel_ctn_en = '1' then				
+					pixel_x <= pixel_x + 1;
+				else
+					pixel_x <= 0;
+				end if;
+			end if;	
+		end if;
+	end process;
+	
+	process (clk, reset)
+	begin
+		if reset = '1' then
+			pixel_y <= (OTHERS => '0');
+		else
+			if rising_edge(clk) then				
+				if pixel_x = pixels_max_x - 1 then				
+					pixel_y <= pixel_y + 1;
+				end if;
+
+				if pixel_y = "1001011000" then
+					pixel_y <= (others => '0');
+				end if;
+				
+			end if;	
+		end if;
+	end process;
+	
+	process (clk, reset)
+	begin
+		if reset = '1' then
+			blank_time_cnt <= 0;
+		else
+			if rising_edge(clk) then				
+				if blank_time_en = '1'  then				
+					blank_time_cnt <= blank_time_cnt + 1;
+				else
+					blank_time_cnt <= 0;
+				end if;
+			end if;	
+		end if;
+	end process;
+	
+	
+	process (disp_ena, shift_out)
+	begin
+	
+		if (disp_ena = '1') then			
+				if (shift_out = '1') then
+					red <= (OTHERS => '1');
+					green <= (OTHERS => '0');
+					blue <= (OTHERS => '0');
+				else
+					red <= (OTHERS => '0');
+					green <= (OTHERS => '0');
+					blue <= (OTHERS => '0');				
+				end if;								
+		else
+			red <= (OTHERS => '0');
+			green <= (OTHERS => '0');
+			blue <= (OTHERS => '0');		
+		end if;
+	
+	end process;
+	
+
+--	PROCESS(disp_ena, row, column)
+--	BEGIN
+--
+--		IF(disp_ena = '1') THEN		--display time
+--			IF(row < 200 AND column < 100) THEN				
+--				red <= (OTHERS => '0');
+--				green	<= (OTHERS => '0');
+--				blue <= (OTHERS => '0');
+--			ELSE
+--				red <= (OTHERS => '1');
+--				green	<= (OTHERS => '1');
+--				blue <= (OTHERS => '0');
+--			END IF;
+--		ELSE								--blanking time
+--			red <= (OTHERS => '0');
+--			green <= (OTHERS => '0');
+--			blue <= (OTHERS => '0');
+--		END IF;
+--	
+--	 END PROCESS;
+	 
+	 
+	 
+END behavior;

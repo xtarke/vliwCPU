@@ -1,0 +1,67 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+use work.opcodes.all;
+use work.alu_functions.all;
+
+entity controller is
+port (
+	clk    				  : in std_logic;	
+	reset				  : in std_logic;
+	
+	dep_stall		  : in std_logic;	-- current interlock dependecy detection	
+	delay_dep	  : in std_logic;	-- true when ex stall happens with a dep_stall
+	ex_stall			  : in std_logic;	-- execution stage dependecy
+	
+		
+   slot_in  : in word_t;	
+		
+	ctrl   : out t_ctrl		
+	);
+end controller;
+
+
+architecture rtl of controller is
+
+	signal nop_reset : std_logic;
+	signal enable : std_logic;
+	signal opcode : std_logic_vector(OPCODE_SIZE-1 downto 0);
+	signal cmp_opcode : std_logic_vector(CMP_OPCODE_SIZE-1 downto 0);
+	signal ins_format : std_logic_vector(INS_FORMAT_SIZE-1 downto 0);
+
+begin
+
+	opcode 				<= slot_in(OPCODE_END downto OPCODE_INI);
+	cmp_opcode		<= slot_in(CMP_OPCODE_END downto CMP_OPCODE_INI);
+	ins_format			<= slot_in(INS_FORMAT_END	downto INS_FORMAT_INI);
+
+	--auto disable/enable
+	process (slot_in)
+	begin
+		if (slot_in = x"0000000") then
+			nop_reset <= '1';
+		else
+			nop_reset <= '0';
+		end if;	
+	end process;	
+	
+	
+	read_slot: process (clk, nop_reset, reset, enable, slot_in, opcode)
+	begin
+		if reset = '1' then
+		
+				
+			
+		else
+			if rising_edge(clk) then --and enable = '1' then				
+								
+				if nop_reset = '0' and dep_stall	= '0'  and ex_stall = '0' and delay_dep = '0' then
+				
+				
+				end if;
+				
+			end if;
+		end if;
+end process;

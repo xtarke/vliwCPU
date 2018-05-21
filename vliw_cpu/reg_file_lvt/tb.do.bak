@@ -1,0 +1,45 @@
+
+
+vlib work
+vcom ../cpu_typedef_package.vhdl sram_register.vhd reg_file_xor.vhd rd_for_mux.vhd tb.vhd
+	  
+vsim -t ns work.tb
+view wave
+add wave -radix binary /clk
+add wave -radix binary /reset
+
+add wave port0_w_en
+add wave port1_w_en
+
+add wave -radix unsigned port0_a_rd_addr
+add wave -radix unsigned /reg_file_1/w0_addr_reg
+add wave -radix hex		/reg_file_1/w0_data_reg
+
+add wave /reg_file_1/port0_w_en
+add wave -radix hex /reg_file_1/q
+
+add wave -radix hex /reg_file_1/w0_data_xor
+add wave -radix hex /reg_file_1/w1_data_xor
+
+
+add wave -radix hex /reg_file_1/ram_r0_0_data
+add wave -radix hex /reg_file_1/ram_w1_0_data
+
+
+add wave -radix unsigned /reg_file_1/w0_addr_reg
+add wave -radix unsigned /reg_file_1/w1_addr_reg
+
+add wave -radix unsigned /reg_file_1/port0_w_addr
+add wave -radix unsigned /reg_file_1/port1_w_addr
+
+
+add wave /reg_file_1/w0_en_reg
+add wave /reg_file_1/w1_en_reg
+
+run 300ns
+
+  
+#view -undock -height 400 -width 400 wave
+wave zoomfull
+#write wave teste.ps
+

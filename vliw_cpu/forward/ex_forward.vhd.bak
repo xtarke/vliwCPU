@@ -1,0 +1,46 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+use work.alu_functions.all;
+
+entity ex_forward is
+port (
+	clk    : in std_logic;	
+	reset  : in std_logic;
+	
+	
+	
+	
+	
+	
+	
+	
+	alu_0		: in word_t;
+	alu_1		: in word_t;
+	alu_2		: in word_t;
+	alu_3		: in word_t;
+	
+	   
+	for_0		: out word_t;
+	
+	
+		
+	);
+end ex_forward;
+
+
+architecture rtl of ex_forward is
+
+	signal enable : std_logic;
+	signal opcode : std_logic_vector(OPCODE_SIZE-1 downto 0);
+
+begin
+
+
+
+
+
+
+end rtl;

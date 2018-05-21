@@ -1,0 +1,22 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+
+entity sdram_controller is 
+        port (
+              -- inputs:
+                 signal address : IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+                 signal byteenable : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
+                 signal chipselect : IN STD_LOGIC;
+                 signal clk : IN STD_LOGIC;
+                 signal clken : IN STD_LOGIC;
+                 signal reset : IN STD_LOGIC;
+                 signal reset_req : IN STD_LOGIC;
+                 signal write : IN STD_LOGIC;
+                 signal writedata : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+
+              -- outputs:
+                 signal readdata : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+              );
+end entity sdram_controller;

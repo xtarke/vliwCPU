@@ -1,0 +1,23 @@
+LIBRARY ieee;
+USE IEEE.STD_LOGIC_1164.ALL;
+use ieee.std_logic_signed.all;
+use IEEE.numeric_std.all;
+use work.cpu_typedef_package.all;
+
+
+entity ld_st_unit is
+
+	port
+	(
+		-- Input ports
+		<name>	: in  <type>;
+		<name>	: in  <type> := <default_value>;
+
+		-- Inout ports
+		<name>	: inout <type>;
+
+		-- Output ports
+		<name>	: out <type>;
+		<name>	: out <type> := <default_value>
+	);
+end <ld_st_unit>;

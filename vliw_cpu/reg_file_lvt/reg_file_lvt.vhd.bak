@@ -1,0 +1,267 @@
+-- Insert library and use clauses
+LIBRARY ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use work.cpu_typedef_package.all;
+
+entity reg_file_xor IS
+port (
+	clk     : in std_logic;
+	reset	  : in std_logic;
+	
+	port0_w_addr 		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port1_w_addr 		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port2_w_addr 		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port3_w_addr 		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+
+	port0_w_data 		: in word_t;
+	port1_w_data 		: in word_t;
+	port2_w_data 		: in word_t;
+	port3_w_data 		: in word_t;
+	
+	port0_w_en 			: in std_logic;
+	port1_w_en 			: in std_logic;
+	port2_w_en 			: in std_logic;
+	port3_w_en 			: in std_logic;
+	
+	port0_a_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port0_b_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port1_a_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port1_b_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port2_a_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port2_b_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port3_a_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	port3_b_rd_addr 	: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	
+	port0_a_rd 			: out word_t;
+	port0_b_rd 			: out word_t;
+	port1_a_rd			: out word_t;
+	port1_b_rd 			: out word_t;
+	port2_a_rd 			: out word_t;
+	port2_b_rd 			: out word_t;
+	port3_a_rd 			: out word_t;
+	port3_b_rd 			: out word_t
+	
+	);
+end entity reg_file_xor;
+
+architecture rtl of reg_file_xor is
+	
+	-- altera dual port BRAM
+	component sram_register
+	port
+	(
+		clock		: IN STD_LOGIC;--  := '1';
+		data		: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		rdaddress: IN STD_LOGIC_VECTOR (5 DOWNTO 0);
+		wraddress: IN STD_LOGIC_VECTOR (5 DOWNTO 0);
+		wren		: IN STD_LOGIC;--  := '0';
+		q			: OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+	);
+	end component;
+	
+	component rd_for_mux
+	port
+	(
+		data0x		: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		data1x		: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		sel			: IN STD_LOGIC ;
+		result		: OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+	);
+	end component;
+	
+	
+	signal w0_addr_reg		: std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	signal w0_data_reg		: word_t;
+	signal w0_en_reg		: std_logic;
+	signal ram_w0_0_data		: word_t;
+	signal ram_r0_0_data		: word_t;	
+	signal w0_data_xor		: word_t;
+	
+	signal p0_for_sel			: std_logic;
+	signal for_r0_0			: word_t;
+	
+	signal w1_addr_reg		: std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	signal w1_data_reg		: word_t;
+	signal w1_en_reg		: std_logic;
+	signal ram_w1_0_data		: word_t;
+	signal ram_r1_0_data		: word_t;
+	signal w1_data_xor      : word_t;
+	
+	signal p1_for_sel			: std_logic;
+	signal for_r0_1			: word_t;
+	
+	
+	signal data : word_t;
+	
+	signal q : word_t;
+	
+	
+	
+begin
+	
+	-----------------------
+	--		 write port 0  --
+	-----------------------
+	
+	--register port and addres and enable
+	w0_register: process (clk, reset, port0_w_addr, port0_w_data,port0_w_en)
+	begin
+		if reset = '1' then
+			w0_addr_reg	<= (w0_addr_reg'range => '0');
+			w0_data_reg <= (w0_data_reg'range => '0');
+			w0_en_reg	<= '0';
+		else
+			if rising_edge(clk) then
+				w0_addr_reg	<= port0_w_addr;
+				w0_data_reg <= port0_w_data;
+				w0_en_reg	<= port0_w_en;				
+			end if;		
+		end if;	
+	end process;	
+	
+	port0_a_rd <= q;
+	
+	
+	teste:	sram_register port map(
+		clock => clk,
+		data	=> w0_data_reg,
+		rdaddress => "000000",
+		wraddress => "000000",
+		wren		 => w0_en_reg,
+		q			 => q
+	);
+	
+	
+	
+	
+--	-- replicated ram blocks
+--	
+--	-- 0 write replic
+--	ram_w0_0	:	sram_register port map(
+--		clock => clk,
+--		data	=> w0_data_xor,
+--		--rdaddress => w1_addr_reg,
+--		rdaddress => port1_w_addr,
+--		wraddress => w0_addr_reg,
+--		wren		 => w0_en_reg,
+--		q			 => ram_w0_0_data
+--	);
+--	
+--	-- replic and mux for read port 0
+--	ram_r0_0	:	sram_register port map(
+--		clock => clk,
+--		data	=> w0_data_xor,
+--		rdaddress => port0_a_rd_addr,
+--		wraddress => w0_addr_reg,
+--		wren		 => w0_en_reg,
+--		q			 => ram_r0_0_data
+--	);
+--			
+--	mux_p0_w0: rd_for_mux port map (
+--		data0x	=> ram_r0_0_data,
+--		data1x	=> w0_data_xor,
+--		sel		=> p0_for_sel,
+--		result	=> for_r0_0
+--	);	
+--	
+--	
+--	
+--	
+--	-- forward logic: if w addr and rd addr are equal, forward new value
+--	w0_forward: process (port0_w_en, w0_addr_reg, port0_a_rd_addr)
+--	begin
+--		if port0_w_en = '1' and w0_addr_reg = port0_a_rd_addr then
+--			p0_for_sel	<= '1';
+--		else
+--			p0_for_sel	<= '0';
+--		end if;	
+--	end process;
+--	
+--	-- xored data
+--	w0_data_xor	<= w0_data_reg xor ram_w1_0_data;
+	
+	-----------------------
+	--		 write port 1  --
+	-----------------------
+	
+	-- 0 write replic
+	w1_register: process (clk, reset, port1_w_addr, port1_w_data,port1_w_en)
+	begin
+		if reset = '1' then
+			w1_addr_reg	<= (w1_addr_reg'range => '0');
+			w1_data_reg <= (w1_data_reg'range => '0');
+			w1_en_reg	<= '0';
+		else
+			if rising_edge(clk) then
+				w1_addr_reg	<= port1_w_addr;
+				w1_data_reg <= port1_w_data;
+				w1_en_reg	<= port1_w_en;				
+			end if;		
+		end if;	
+	end process;	
+	
+	
+--	ram_w1_0	:	sram_register port map(
+--		clock => clk,
+--		data	=> w1_data_xor,
+--		--rdaddress => w0_addr_reg,
+--		--rdaddress => port0_w_addr,
+--		rdaddress => "000000",
+--		wraddress => w1_addr_reg,
+--		wren		 => w1_en_reg,
+--		q			 => ram_w1_0_data
+--	);
+--	
+--	-- replic and mux for read port 0
+--	ram_r1_0	:	sram_register port map(
+--		clock => clk,
+--		data	=> w1_data_xor,
+--		rdaddress => port0_a_rd_addr,
+--		wraddress => w1_addr_reg,
+--		wren		 => w1_en_reg,
+--		q			 => ram_r1_0_data
+--	);
+--	
+--	mux_p0_w1: rd_for_mux port map (
+--		data0x	=> ram_r1_0_data,
+--		data1x	=> w1_data_xor,
+--		sel		=> p1_for_sel,
+--		result	=> for_r0_1
+--	);
+--	
+--	-- forward logic: if w addr and rd addr are equal, forward new value
+--	w1_forward: process (port1_w_en, w1_addr_reg, port0_a_rd_addr)
+--	begin
+--		if port1_w_en = '1' and  w1_addr_reg = port0_a_rd_addr then
+--			p1_for_sel	<= '1';
+--		else
+--			p1_for_sel	<= '0';
+--		end if;	
+--	end process;
+--	
+--	-- xored data
+--	w1_data_xor	<= w1_data_reg xor ram_w1_0_data;			
+	
+	--port0_a_rd	<= for_r0_1 xor for_r0_0;
+	
+	
+	
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
+
+end architecture rtl;

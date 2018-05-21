@@ -1,0 +1,67 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+use work.opcodes.all;
+use work.alu_functions.all;
+
+entity ex_buffer is
+port (
+	clk    : in std_logic;	
+	reset  : in std_logic;
+		
+   slot_in : word_t;
+	
+		
+	ctrl   : out t_ctrl
+		
+	);
+end ex_buffer;
+
+
+architecture rtl of controller is
+
+	signal enable : std_logic;
+	signal opcode : std_logic_vector(OPCODE_SIZE-1 downto 0);
+
+begin
+
+	opcode <= slot_in(OPCODE_END downto OPCODE_INI);
+
+	--auto disable/enable
+	process (slot_in)
+	begin
+		if (slot_in = x"0000000") then
+			enable <= '0';
+		else
+			enable <= '1';
+		end if;	
+	end process;	
+	
+	
+	read_slot: process (clk, reset)
+	begin
+		if reset = '1' then
+			ctrl.alu_func <= (ctrl.alu_func'range => '0');
+			ctrl.branch_en <= '0';
+			
+		else
+			if rising_edge(clk) and enable = '1' then				
+			
+				ctrl.alu_func  <= (ctrl.alu_func'range => '0');
+				ctrl.branch_en <= '0';
+	
+				case opcode is
+					when ADD =>
+						ctrl.alu_func <= ALU_ADD;					
+					--when SUB => 
+					--	ctrl.alu_func <= ALU_SUB;		
+					when others =>				
+				end case;
+					
+			end if;	
+		end if;	
+	end process;
+
+end rtl;

@@ -1,0 +1,96 @@
+ibrary IEEE;
+use ieee.std_logic_arith.all;
+--use ieee.std_logic_unsigned.all;
+use ieee.std_logic_signed.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+use work.alu_functions.all;
+
+entity mul_div_unit is
+port (
+	clk    : in std_logic;	
+	reset  : in std_logic;
+	
+	-- cycle that need forward
+	rd_ctrl_src_0_a		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	rd_ctrl_src_1_a		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	rd_ctrl_src_2_a		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	rd_ctrl_src_3_a		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	
+	rd_ctrl_src_0_b		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	rd_ctrl_src_1_b		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	rd_ctrl_src_2_b		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	rd_ctrl_src_3_b		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	
+	scond_0					: in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	scond_1					: in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	scond_2					: in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	scond_3					: in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+
+	-- immediates	
+	imm_0							: word_t;
+	imm_1							: word_t;
+	imm_2							: word_t;
+	imm_3							: word_t;
+	
+	-- register / immediate selection
+	src_2_sel_0				: IN STD_LOGIC;
+	src_2_sel_1				: IN STD_LOGIC;
+	src_2_sel_2				: IN STD_LOGIC;
+	src_2_sel_3				: IN STD_LOGIC;
+	
+	-- destination registers
+	wb_addr_reg_0		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	wb_reg_w_en_0	: in std_logic;
+		
+	wb_addr_reg_1		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	wb_reg_w_en_1	: in std_logic;
+	
+	wb_addr_reg_2		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	wb_reg_w_en_2	: in std_logic;
+	
+	wb_addr_reg_3		: in std_logic_vector(REG_ADDR_SIZE-1 downto 0);
+	wb_reg_w_en_3	: in std_logic;
+	
+	-- destination predicates
+	wb_addr_pred_0 : in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	wb_pred_w_en_0: in std_logic;
+	
+	wb_addr_pred_1 : in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	wb_pred_w_en_1: in std_logic;
+	
+	wb_addr_pred_2 : in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	wb_pred_w_en_2: in std_logic;
+	
+	wb_addr_pred_3 : in std_logic_vector(PRED_ADDR_SIZE-1 downto 0);
+	wb_pred_w_en_3: in std_logic;	
+		
+	func_0   : in std_logic_vector(ALU_FUN_SIZE-1 downto 0);	
+	func_1   : in std_logic_vector(ALU_FUN_SIZE-1 downto 0);	
+	func_2   : in std_logic_vector(ALU_FUN_SIZE-1 downto 0);	
+	func_3   : in std_logic_vector(ALU_FUN_SIZE-1 downto 0);	
+   
+	carry_in_0		 : in std_logic;
+	carry_in_1		 : in std_logic;
+	carry_in_2		 : in std_logic;
+	carry_in_3		 : in std_logic;
+	
+	src1_in_0		 : in word_t;
+	src2_in_0		 : in word_t;
+	
+	src1_in_1		 : in word_t;
+	src2_in_1		 : in word_t;
+	
+	src1_in_2		 : in word_t;
+	src2_in_2		 : in word_t;
+	
+	src1_in_3		 : in word_t;
+	src2_in_3		 : in word_t;
+				
+	alu_out_0		: out t_alu_val;
+	alu_out_1		: out t_alu_val;
+	alu_out_2		: out t_alu_val;
+	alu_out_3		: out t_alu_val
+		
+	);
+end salu;

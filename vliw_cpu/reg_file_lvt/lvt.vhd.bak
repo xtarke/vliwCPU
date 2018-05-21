@@ -1,0 +1,14 @@
+LIBRARY ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use work.cpu_typedef_package.all;
+
+entity lvt IS
+port (
+
+
+
+
+	);
+end entity reg_file_lvt;

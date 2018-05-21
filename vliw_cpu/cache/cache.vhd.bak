@@ -1,0 +1,311 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+
+entity cache is
+port (
+	clk     : in std_logic;
+	mem_clk : in std_logic;
+	reset   : in std_logic;
+	abort   : in std_logic;
+	
+	address         : in word_t;
+		
+	--RAM memory read control
+	mem_data_in    : in word_t;
+	mem_addr_out   : out std_logic_vector (RAM_ADDR_SIZE-1 downto 0);
+	mem_enable_out : out std_logic; 	
+	ram_clk_en_out : out std_logic;
+
+	--cache data out
+	--data_out  : out std_logic_vector (BUNDLE_SIZE-1 downto 0);
+	stall_out : out std_logic;
+	
+	data_out  : out std_logic_vector (CACHE_LINE_SIZE-1 downto 0)
+	
+	);
+end cache;
+
+
+architecture rtl of cache is	
+	-- data mem definition: BLOCK_SIZE words per cache line
+	type data_latches_type is array (0 to BLOCK_SIZE-1) of word_t;
+	
+	-- fsm definition
+	type cache_state_type is (C_COMP_TAG, C_MEM_PREP, C_RD_BLOCK, C_MEM_END, C_MEM_WRITE);
+		
+	--internal signals
+	signal tag 		 : std_logic_vector(TAG_SIZE-1 downto 0);	
+	signal index    : std_logic_vector(INDEX_SIZE-1 downto 0);
+	--signal b_offset : std_logic_vector(BK_OFFSET_SIZE-1 downto 0);
+
+	signal base_mem_addr   : std_logic_vector(RAM_ADDR_SIZE-1 downto 0);	
+	signal word_index : std_logic_vector(BK_OFFSET_SIZE downto 0); 
+	--	sc_signal<sc_uint<BK_OFFSET_SIZE + 1> > word_index;
+
+	signal hit         : std_logic;
+	signal cache_state : cache_state_type;
+	
+	--cache storage		
+	signal sram_enable  	    : std_logic;	
+	signal sram_data_out 	 : std_logic_vector (255 DOWNTO 0);	
+	signal sram_tag_data_out : std_logic_vector (TAG_SIZE-1 DOWNTO 0);
+	signal sram_tag_wen		 : std_logic;
+	
+	signal cache_line       : std_logic_vector(255 downto 0);	
+	signal latch_index      : std_logic_vector (2 downto 0);
+	signal cache_line_data  : data_latches_type;		
+	
+	signal line_en	: std_logic;
+	
+	signal v_bit_in  : std_logic;
+	signal v_bit_out : std_logic;
+	
+	--256 words SRAM to store data
+	component sram
+	--component sram_data
+	port
+	(
+		address	:  in STD_LOGIC_VECTOR (INDEX_SIZE-1 DOWNTO 0);
+		clock		:	in STD_LOGIC;
+		data		:  in STD_LOGIC_VECTOR (255 DOWNTO 0);
+		wren		:  in STD_LOGIC;
+		q			:  out  STD_LOGIC_VECTOR (255 DOWNTO 0)
+	);
+	end component;
+	
+	
+	--16 words SRAM to store tag
+	component sram_tag 
+	port
+	(		
+		clock		:	in STD_LOGIC;
+		data		:  in std_logic_vector (TAG_SIZE-1 DOWNTO 0);
+		address  :  in std_logic_vector (INDEX_SIZE-1 DOWNTO 0);
+		we		   :  in STD_LOGIC;
+		q			:  out  STD_LOGIC_VECTOR (TAG_SIZE-1 DOWNTO 0)
+	);
+	end component;
+	
+	-- register to store v_bit
+	component sram_v
+   port
+   (
+      clock: 			 in   std_logic;
+		reset:			 in 	std_logic;
+		data:  			 in   std_logic;
+      address:  		 in   std_logic_vector (INDEX_SIZE-1 DOWNTO 0);
+ 		we:    			 in   std_logic;
+      q: 			    out  std_logic
+   );
+	end component;	
+		
+begin	
+	
+	sram_data_1 : sram
+	--sram_data_1 : sram_data	--coulnd't infer RAMBLOCK
+		port map (
+			clock => clk, address => index, data => cache_line, 
+			wren => sram_enable, q => sram_data_out
+	);
+		
+	sram_tag_data : sram_tag
+		port map (
+			clock => clk, address => index, data => tag, 
+			we => sram_tag_wen, q => sram_tag_data_out
+		);
+	
+	sram_vbit: sram_v
+		port map (
+			clock => clk, reset => reset, data => v_bit_in,
+			address => index, we => sram_tag_wen, q => v_bit_out		
+		);
+	
+	stall_out	<= not hit;
+	
+	v_bit_in <= '1';
+	
+	do_cache_addr : process (reset, address)
+	begin
+		--if cache_state = C_COMP_TAG then
+		if reset = '0' then
+			tag      <= address(TAG_END downto TAG_INI);
+			index    <= address(INDEX_END downto INDEX_INI);
+			--b_offset <= address(BK_OFFSET_END downto BK_OFFSET_INI);
+			
+			--index * bloCK_SIZE	
+			base_mem_addr <=  address(WORD_SIZE-1 downto INDEX_INI) & "000";			
+		else
+			tag      <= (tag'range => '0');
+			index    <= (index'range => '0');
+			--b_offset <= (b_offset'range => 'Z');		
+			base_mem_addr <= (base_mem_addr'range => '0');			
+		end if;	
+	end process;
+		
+	do_clk_state: process (mem_clk, reset, abort)
+	begin
+		if reset = '1' or abort = '1' then
+			cache_state <= C_COMP_TAG;			
+		else
+			if rising_edge (mem_clk) then
+				case cache_state is
+					when C_COMP_TAG =>
+						if hit = '0' then
+							cache_state <= C_MEM_PREP;					
+						end if;
+					
+					when C_MEM_PREP =>
+						cache_state <= C_RD_BLOCK;	
+					
+					when C_RD_BLOCK =>
+						if word_index >= BLOCK_SIZE-1 then
+							cache_state <= C_MEM_END;						
+						end if;						
+					when C_MEM_END => 
+						cache_state <= C_MEM_WRITE;
+						
+					when C_MEM_WRITE => 
+						cache_state <= C_COMP_TAG;
+						
+				end case;		
+			end if;		
+		end if;	
+	end process;
+	
+	ram_clk_en_out <= not hit;
+	
+	do_check_hit: process (clk, abort, tag, cache_state, reset, sram_tag_data_out, v_bit_out)
+	begin
+		if reset = '1' or abort = '1' then 
+			hit <= '0';		
+		else
+			hit <= '0';								
+			if cache_state = C_COMP_TAG  then --and rising_edge(clk) then			
+				if sram_tag_data_out = tag and v_bit_out = '1' then
+					hit <= '1';		
+				else
+					hit <= '0';						
+				end if;			
+			end if;
+		end if;		
+	end process;
+		  
+	
+	do_state_output: process (cache_state)
+	begin
+		mem_enable_out <= '0';
+		line_en	<= '0';
+				
+		case cache_state is
+			when C_COMP_TAG =>		
+				line_en	<= '0';
+				
+			when C_MEM_PREP =>
+				line_en			<= '0';
+				mem_enable_out <= '1';
+			when C_RD_BLOCK =>
+				line_en			<= '1';
+				mem_enable_out <= '1';
+			when C_MEM_END =>
+				line_en	<= '1';
+				mem_enable_out <= '0';
+			when C_MEM_WRITE =>
+				line_en	<= '0';
+				mem_enable_out <= '0';
+				
+			end case;
+	end process;
+	
+	do_mem_address_ouput: process (mem_clk, reset, cache_state, word_index, base_mem_addr)
+	begin
+		if reset = '1' then
+			word_index <= (word_index'range => '0');			
+		else		
+			if rising_edge (mem_clk)  then	
+					
+					word_index <= word_index + 1;
+								
+					if word_index >= BLOCK_SIZE-1 or cache_state = C_COMP_TAG then
+						word_index <= (word_index'range => '0');					
+					end if;
+				
+			end if;
+		
+		end if;
+	end process;
+	
+	process (word_index, base_mem_addr)
+	begin
+		mem_addr_out <= base_mem_addr + word_index;	
+	end process;
+	
+	--mem_addr_out <= mem_addr;
+	
+	do_store_tag: process (cache_state, reset)
+	begin
+		if reset = '1' then
+			sram_tag_wen <= '0';
+		else
+			if cache_state = C_MEM_END then
+				sram_tag_wen <= '1';
+			else
+				sram_tag_wen <= '0';			
+			end if;			
+		end if;
+	end process;
+	
+	do_store_data: process (cache_state, reset)
+	begin
+		if reset = '1' then
+			sram_enable <= '0';
+		else
+			if cache_state = C_MEM_WRITE then
+				sram_enable <= '1';
+			else
+				sram_enable <= '0';	
+			end if;		
+		end if;	
+	end process;
+
+	--concatenate all words
+	do_make_cache_line: process (cache_state, cache_line_data)
+	begin
+		if cache_state = C_MEM_WRITE then
+			cache_line <= cache_line_data(7) & cache_line_data(6) &
+									cache_line_data(5) & cache_line_data(4) &
+									cache_line_data(3) & cache_line_data(2) &
+									cache_line_data(1) & cache_line_data(0);
+		else
+			cache_line <= (cache_line'range => '0');	
+		end if;
+	end process;	
+	
+	do_cache_line_counter: process (mem_clk, line_en, latch_index, mem_data_in)
+	begin
+		if line_en = '0' then
+			latch_index	<= (latch_index'range => '0');
+		else
+			if rising_edge (mem_clk) then			
+				latch_index	<= latch_index + 1;
+
+				cache_line_data(conv_integer(latch_index)) <= mem_data_in;	
+			end if;
+		end if;		
+	end process;
+
+		
+	do_data_output: process (hit, sram_data_out)
+	begin
+		--pre_index and pre_tag usefull to wait until tag_sram responds
+		if hit = '1' then						
+			data_out <= sram_data_out;
+		else
+			data_out <= (data_out'range => 'X');			
+		end if;		
+	end process;		
+
+end rtl;
+

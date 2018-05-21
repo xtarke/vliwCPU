@@ -1,0 +1,84 @@
+library IEEE;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+use IEEE.STD_LOGIC_1164.all;
+use work.cpu_typedef_package.all;
+
+entity cache_buffer is
+port (
+	clk      			: in std_logic;	
+	reset    			: in std_logic;
+	branch_in			: in std_logic;
+		
+	bundle_sel			: in std_logic;
+	
+	address				: in word_t;	
+	
+	cache_data			: in std_logic_vector(CACHE_LINE_SIZE-1 downto 0);
+	
+	bundle_out 			: out std_logic_vector(BUNDLE_SIZE-1 downto 0);
+	
+	
+	cache_address		: out word_t
+	
+	);
+end cache_buffer;
+
+
+
+architecture rtl of cache_buffer is
+	signal latched_data	:	std_logic_vector(CACHE_LINE_SIZE-1 downto 0);
+
+	--signal branch_line_offset	: std_logic;
+	
+	
+begin
+
+	do_read: process (clk, reset)
+	begin
+		if reset = '1' then
+			latched_data <= (latched_data'range => '0');
+		else		
+			latched_data <= cache_data;			
+		end if;		
+	end process;
+	
+	do_write: process (bundle_sel, latched_data)
+	begin
+			if bundle_sel = '0' then
+				bundle_out <= latched_data(BUNDLE_SIZE-1 downto 0);
+			else
+				bundle_out <= latched_data(2*BUNDLE_SIZE-1 downto BUNDLE_SIZE);
+			end if;		
+	end process;
+	
+	new_addr: process (reset, bundle_sel, cache_stall, address)
+	begin
+		if reset = '1' then
+			cache_address <= (cache_address'range => '0');		
+		else
+			if branch_in = '1' then
+				cache_address <= address;
+			else
+				if falling_edge(bundle_sel) then
+					cache_address <= (address(WORD_SIZE-1 downto BK_OFFSET_END) & "00");
+				else
+					if rising_edge(bundle_sel) then
+						cache_address <= (address(WORD_SIZE-1 downto BK_OFFSET_END) & "00")+ 4;
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;
+	
+--	branch_bundle: process (reset, branch_in, bundle_sel)
+--	begin
+--		if reset = '1' then
+--			branch_line_offset <= '0';
+--		else
+--			if falling_edge(branch_in) then
+--				branch_line_offset <= bundle_sel;
+--			end if;
+--		end if;
+--	end process;
+end rtl;
