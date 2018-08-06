@@ -1,0 +1,96 @@
+/home/andreu/Trabalhos/llvm/lib/Support/Release+Asserts/ConstantRange.o \
+ /home/andreu/Trabalhos/llvm/lib/Support/Release+Asserts/ConstantRange.d: \
+ ConstantRange.cpp \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/InstrTypes.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/Twine.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/StringRef.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/type_traits.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/DataTypes.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/ErrorHandling.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Compiler.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Config/llvm-config.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/DerivedTypes.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/Type.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/APFloat.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/APInt.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/ArrayRef.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallVector.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/AlignOf.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/MathExtras.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/SwapByteOrder.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Casting.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/Instruction.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/ilist_node.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/User.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/Value.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/Use.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/PointerIntPair.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/PointerLikeTypeTraits.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/DebugLoc.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/Instruction.def \
+ /home/andreu/Trabalhos/llvm/include/llvm/IR/OperandTraits.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/ConstantRange.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Debug.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/raw_ostream.h
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/InstrTypes.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/Twine.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/StringRef.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/type_traits.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/DataTypes.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/ErrorHandling.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Compiler.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Config/llvm-config.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/DerivedTypes.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/Type.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/APFloat.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/APInt.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/ArrayRef.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallVector.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/AlignOf.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/MathExtras.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/SwapByteOrder.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Casting.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/Instruction.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/ilist_node.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/User.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/Value.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/Use.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/PointerIntPair.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/PointerLikeTypeTraits.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/DebugLoc.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/Instruction.def:
+
+/home/andreu/Trabalhos/llvm/include/llvm/IR/OperandTraits.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/ConstantRange.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Debug.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/raw_ostream.h:

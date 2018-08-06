@@ -1,0 +1,99 @@
+/home/andreu/Trabalhos/llvm/lib/Support/Release+Asserts/CommandLine.o \
+ /home/andreu/Trabalhos/llvm/lib/Support/Release+Asserts/CommandLine.d: \
+ CommandLine.cpp \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/CommandLine.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallVector.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/AlignOf.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Compiler.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Config/llvm-config.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/type_traits.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/DataTypes.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/Twine.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/StringRef.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/ErrorHandling.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/OwningPtr.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallPtrSet.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/PointerLikeTypeTraits.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallString.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/ADT/StringMap.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Allocator.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/MathExtras.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/SwapByteOrder.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Config/config.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Debug.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Host.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/ManagedStatic.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Atomic.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Threading.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Valgrind.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/MemoryBuffer.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/Path.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/PathV1.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/TimeValue.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/PathV2.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/raw_ostream.h \
+ /home/andreu/Trabalhos/llvm/include/llvm/Support/system_error.h
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/CommandLine.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallVector.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/AlignOf.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Compiler.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Config/llvm-config.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/type_traits.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/DataTypes.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/Twine.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/StringRef.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/ErrorHandling.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/OwningPtr.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallPtrSet.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/PointerLikeTypeTraits.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/SmallString.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/ADT/StringMap.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Allocator.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/MathExtras.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/SwapByteOrder.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Config/config.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Debug.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Host.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/ManagedStatic.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Atomic.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Threading.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Valgrind.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/MemoryBuffer.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/Path.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/PathV1.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/TimeValue.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/PathV2.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/raw_ostream.h:
+
+/home/andreu/Trabalhos/llvm/include/llvm/Support/system_error.h:

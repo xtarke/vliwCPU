@@ -1,0 +1,9 @@
+
+add_llvm_target(NewTargetCodeGen
+  NewTargetMachine.cpp
+  )
+
+add_dependencies(LLVMNewTargetCodeGen intrinsics_gen)
+
+add_subdirectory(TargetInfo)
+
